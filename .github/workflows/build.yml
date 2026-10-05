@@ -1,0 +1,47 @@
+name: Build and verify SafeinCloud
+on: [push, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm test
+      - run: node --check dist/app.js
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SafeinCloud-Web
+          path: dist/
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.11.1'
+      - run: gradle -p android assembleDebug
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SafeinCloud-Android-debug
+          path: android/app/build/outputs/apk/debug/*.apk
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - run: dotnet publish windows/SafeinCloud.csproj -c Release -o output/windows
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SafeinCloud-Windows
+          path: output/windows/
