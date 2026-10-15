@@ -8,7 +8,7 @@ import java.util.Arrays;
 public final class VaultStore {
  private final Context context;private final AtomicFile file;
  public VaultStore(Context c){context=c;file=new AtomicFile(new File(c.getNoBackupFilesDir(),"vault-v1.json"));}
- public boolean exists(){return file.getBaseFile().exists();}
+ public boolean exists(){return file.getBaseFile().exists()||new File(file.getBaseFile().getPath()+".bak").exists();}
  public String read()throws Exception{return new String(file.readFully(),StandardCharsets.UTF_8);}
  public synchronized void write(String envelope)throws Exception{
   VaultCrypto.validate(envelope);FileOutputStream out=null;
