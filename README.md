@@ -6,7 +6,7 @@ Repository: https://github.com/lehuynhanhtu-prog/SafeInCloud
 ## Chức năng
 Kho mật khẩu APP, WEB, thẻ tín dụng, khóa cửa, email; thêm/sửa/xóa, tìm kiếm, trường tùy chỉnh, tạo mật khẩu, nhập CSV SafeInCloud với các cột chính xác `Title,Login,Password,URL,Notes,OTP`, sao lưu/khôi phục mã hóa, Google Drive.
 
-Web/PWA là ứng dụng chính. Android mở cùng ứng dụng qua Chrome Custom Tabs; Windows mở qua Edge app mode. Hai bản này là trình mở ứng dụng web, chưa phải kho native độc lập. Bản Web dự kiến triển khai trên GitHub Pages: https://lehuynhanhtu-prog.github.io/SafeInCloud/ Cài PWA bằng trình duyệt có hỗ trợ. Không có chức năng tự điền mật khẩu hệ thống hay sinh mã OTP; trường OTP được giữ nguyên khi nhập.
+Web/PWA là ứng dụng chính. Android Native 1.0.0 dùng Android Views, Android Keystore và BiometricPrompt, không dùng WebView/Custom Tabs. Hướng dẫn Google và chuyển kho: [android/README-native.md](android/README-native.md). Windows vẫn mở Web qua Edge app mode. Bản Web dự kiến triển khai trên GitHub Pages: https://lehuynhanhtu-prog.github.io/SafeInCloud/ Cài PWA bằng trình duyệt có hỗ trợ. Không có chức năng tự điền mật khẩu hệ thống hay sinh mã OTP; trường OTP được giữ nguyên khi nhập.
 
 File mẫu đính kèm có sáu cột và 115 dòng trống, không chứa tài khoản/mật khẩu. Bộ nhập bỏ qua các dòng trống.
 
@@ -26,7 +26,7 @@ CSV được xử lý trên thiết bị khi người dùng nhập; file thật 
 ## Chạy và build
 Node 22+: `npm test`. Chạy local: `npm start`, mở localhost:8080. OAuth cần localhost origin tương ứng. HTTPS bắt buộc khi xuất bản; localStorage và Web Locks cần trình duyệt hiện đại.
 
-GitHub Actions `build.yml` chạy kiểm tra và tạo Web, APK debug và Windows executable. APK debug phục vụ thử nghiệm, không thay thế bản release có chữ ký ổn định. Bản Windows chưa có Authenticode. Cần chạy workflow sau khi repository được tạo và tải artifact. Chưa kiểm thử trực tiếp trên Android/Windows trong môi trường hiện tại.
+GitHub Actions `build.yml` chạy kiểm tra và tạo Web, APK native release có chữ ký cố định và Windows executable. APK được kiểm tra fingerprint release trước khi tải lên. Bản Windows chưa có Authenticode. Cần chạy workflow sau khi repository được tạo và tải artifact. Chưa kiểm thử trực tiếp trên Android/Windows trong môi trường hiện tại.
 
 Trước khi phát hành chính thức: kiểm tra Google OAuth trên các thiết bị thật, ký bản Android/Windows, kiểm toán bảo mật, kiểm tra khôi phục từ bản sao, quyết định tên thương hiệu để tránh nhầm với sản phẩm SafeInCloud hiện có.
 
