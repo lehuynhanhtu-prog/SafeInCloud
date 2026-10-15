@@ -37,7 +37,7 @@ Khi đổi từ địa chỉ web cũ sang GitHub Pages, localStorage không tự
 
 ## Đăng nhập và sinh trắc học (0.4)
 
-Màn hình khóa chỉ có mật khẩu (mặc định ẩn), mở khóa bằng xác minh thiết bị khi đã bật và nút Cài đặt. Tạo kho, Import CSV, khôi phục và chọn Google Drive nằm trong Cài đặt.
+Màn hình khóa chỉ có mật khẩu (mặc định ẩn) và mở khóa bằng xác minh thiết bị khi đã bật. Cài đặt chỉ mở sau khi đăng nhập. Thiết bị chưa có kho hiển thị luồng Thiết lập lần đầu riêng để tạo mới hoặc khôi phục; luồng này không mở Cài đặt. Tạo kho, Import CSV, khôi phục và chọn Google Drive nằm trong Cài đặt.
 
 Sau khi mở kho bằng mật khẩu, chọn Cài đặt → Bật vân tay / khuôn mặt và xác nhận mật khẩu chính. WebAuthn platform passkey yêu cầu user verification; PRF + HKDF-SHA256 tạo khóa AES-256-GCM để bảo vệ mật khẩu chính. Chỉ lưu bản mã, credential ID, IV và salt; không lưu mật khẩu dạng rõ. Sinh trắc học do hệ điều hành quản lý. Có thể dùng PIN/mã khóa màn hình tùy thiết bị; ứng dụng không ép riêng vân tay hoặc khuôn mặt. Thiết bị/trình duyệt không có PRF sẽ từ chối bật tính năng và tiếp tục dùng mật khẩu. Không đồng bộ thiết lập mở khóa nhanh theo file sao lưu của kho. Passkey có thể được hệ điều hành đồng bộ tùy nhà cung cấp; thay kho sẽ vô hiệu thiết lập của kho cũ trên trình duyệt. Xóa thiết lập trong app không xóa passkey trong hệ điều hành.
 
