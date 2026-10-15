@@ -2,6 +2,7 @@ package vn.safeincloud.personal;
 import android.accounts.*;
 import android.app.AlertDialog;
 import android.content.*;
+import android.content.ClipboardManager;
 import android.graphics.*;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
