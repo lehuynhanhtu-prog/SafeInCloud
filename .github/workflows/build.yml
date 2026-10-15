@@ -102,7 +102,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: |
-          gh release view downloads >/dev/null 2>&1 || gh release create downloads --target "$GITHUB_SHA" --title "SafeInCloud · Tải ứng dụng" --notes "Android Native 1.0.0: giao diện native, Android Keystore và sinh trắc học mạnh; APK đã ký phát hành. Kết nối Drive cần OAuth Android đúng package/SHA-1; xem android/README-native.md. Windows vẫn mở kho Web qua Edge. Chưa kiểm thử điện thoại thật hoặc kiểm toán bảo mật độc lập."
-          gh release edit downloads --notes "Android Native 1.0.0: APK ký phát hành, kho offline, sinh trắc học Android Keystore, import CSV và file kho Web. Drive cần cấu hình OAuth Android theo android/README-native.md. Sao lưu kho trước khi chuyển từ bản debug cũ. Windows mở kho Web qua Edge. Chưa kiểm thử thiết bị thật hoặc kiểm toán độc lập."
+          gh release view downloads >/dev/null 2>&1 || gh release create downloads --target "$GITHUB_SHA" --title "SafeInCloud · Tải ứng dụng" --notes "Android Native 1.1.0: giao diện Material 3, form nhập chuyên nghiệp, Android Keystore và sinh trắc học mạnh; APK đã ký phát hành. Kết nối Drive cần OAuth Android đúng package/SHA-1; xem android/README-native.md."
+          gh release edit downloads --notes "Android Native 1.1.0: giao diện Material 3, form nhập viền nổi có nút ẩn/hiện, danh sách dạng thẻ và điều hướng dưới. APK ký phát hành, kho offline, sinh trắc học Android Keystore, import CSV và tương thích file kho Web. Drive cần cấu hình OAuth Android theo android/README-native.md. Sao lưu kho trước khi chuyển từ bản debug cũ. Windows mở kho Web qua Edge. Chưa kiểm thử thiết bị thật hoặc kiểm toán độc lập."
           gh release upload downloads SafeInCloud-Android.apk SafeInCloud-Windows-x64.zip SHA256SUMS.txt --clobber
 
