@@ -1,5 +1,8 @@
 name: Build and verify SafeInCloud
 on: [push, workflow_dispatch]
+concurrency:
+  group: safeincloud-build-${{ github.ref }}
+  cancel-in-progress: true
 permissions:
   contents: read
 jobs:
