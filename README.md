@@ -6,7 +6,7 @@ Repository: https://github.com/lehuynhanhtu-prog/SafeInCloud
 ## Chức năng
 Kho mật khẩu APP, WEB, thẻ tín dụng, khóa cửa, email; thêm/sửa/xóa, tìm kiếm, trường tùy chỉnh, tạo mật khẩu, nhập CSV SafeInCloud với các cột chính xác `Title,Login,Password,URL,Notes,OTP`, sao lưu/khôi phục mã hóa, Google Drive.
 
-Web/PWA là ứng dụng chính. Android mở cùng ứng dụng qua Chrome Custom Tabs; Windows mở qua Edge app mode. Hai bản này là trình mở ứng dụng web, chưa phải kho native độc lập. Bản Web dự kiến triển khai trên GitHub Pages: https://lehuynhanhtu-prog.github.io/SafeInCloud/ Cài PWA bằng trình duyệt có hỗ trợ. Không có chức năng tự điền mật khẩu hệ thống, sinh mã OTP hay sinh trắc học trong bản này; trường OTP được giữ nguyên khi nhập.
+Web/PWA là ứng dụng chính. Android mở cùng ứng dụng qua Chrome Custom Tabs; Windows mở qua Edge app mode. Hai bản này là trình mở ứng dụng web, chưa phải kho native độc lập. Bản Web dự kiến triển khai trên GitHub Pages: https://lehuynhanhtu-prog.github.io/SafeInCloud/ Cài PWA bằng trình duyệt có hỗ trợ. Không có chức năng tự điền mật khẩu hệ thống hay sinh mã OTP; trường OTP được giữ nguyên khi nhập.
 
 File mẫu đính kèm có sáu cột và 115 dòng trống, không chứa tài khoản/mật khẩu. Bộ nhập bỏ qua các dòng trống.
 
@@ -14,9 +14,9 @@ File mẫu đính kèm có sáu cột và 115 dòng trống, không chứa tài 
 Authorized JavaScript origin: `https://lehuynhanhtu-prog.github.io` (không gồm đường dẫn `/SafeInCloud/`).
 Project number: 862228353042. Web Client ID đã điền từ cấu hình Sổ Xe cá nhân; cần xác nhận trong Console nếu ID đã đổi. Bật Drive API, thêm origin chính xác của web SafeInCloud vào Authorized JavaScript origins, thêm email vào Test users. Không dùng Client Secret hay Picker API key. Chỉ xin quyền drive.appdata, kho nằm trong vùng dữ liệu ứng dụng riêng trên Drive.
 
-Lưu Drive tạo một snapshot mới, không ghi đè bản cũ. Để dùng kho trên thiết bị khác: màn hình khóa → Mở kho từ Google Drive → chọn đúng tài khoản → xác nhận → nhập mật khẩu chính. Khi khôi phục kho khác, bản mã cũ được tải xuống trước. Sau sửa dữ liệu, nhấn Đồng bộ Drive để lưu snapshot. Không tự hợp nhất dữ liệu giữa thiết bị; snapshot cũ được giữ và chưa có giao diện dọn dẹp.
+Lưu Drive tạo một snapshot mới, không ghi đè bản cũ. Để dùng kho trên thiết bị khác: Cài đặt → Mở kho từ Google Drive → chọn đúng tài khoản → xác nhận → nhập mật khẩu chính. Khi khôi phục kho khác, bản mã cũ được tải xuống trước. Sau sửa dữ liệu, nhấn Đồng bộ Drive để lưu snapshot. Không tự hợp nhất dữ liệu giữa thiết bị; snapshot cũ được giữ và chưa có giao diện dọn dẹp.
 
-Mật khẩu chính mới tối thiểu 6 ký tự; chấp nhận chữ, số và ký tự đặc biệt. Các kho cũ vẫn mở bằng mật khẩu gốc. Client ID được ẩn khỏi giao diện; đây là định danh OAuth công khai, không phải khóa mã hóa. Import file CSV có ở màn hình đăng nhập và thanh công cụ sau mở khóa.
+Mật khẩu chính mới tối thiểu 6 ký tự; chấp nhận chữ, số và ký tự đặc biệt. Các kho cũ vẫn mở bằng mật khẩu gốc. Client ID được ẩn khỏi giao diện; đây là định danh OAuth công khai, không phải khóa mã hóa. Import file CSV nằm trong Cài đặt và thanh công cụ sau mở khóa.
 
 ## Bảo mật và giới hạn
 AES-256-GCM với IV ngẫu nhiên 96-bit mỗi lần lưu; PBKDF2-HMAC-SHA256 600.000 vòng, salt 128-bit. Mật khẩu chính và khóa chỉ ở bộ nhớ phiên. Không lưu bản rõ ở localStorage hoặc Drive. Google token chỉ ở bộ nhớ. Tự khóa 5 phút không hoạt động, khi rời ứng dụng (ngoại trừ popup OAuth trong thời gian ngắn), khi thay đổi kho ở tab khác. Các cửa sổ ghi cùng thiết bị được điều phối bằng Web Locks. Clipboard là do hệ điều hành quản lý, cần xóa thủ công; không hứa tự xóa vì trình duyệt không luôn cho phép.
@@ -34,3 +34,15 @@ Trước khi phát hành chính thức: kiểm tra Google OAuth trên các thi�
 Trong Settings → Pages, chọn Source: GitHub Actions. Workflow `pages.yml` kiểm tra rồi xuất bản riêng thư mục `dist/`. Tài khoản hiện tại yêu cầu repository Public hoặc nâng cấp gói để bật Pages.
 
 Khi đổi từ địa chỉ web cũ sang GitHub Pages, localStorage không tự chuyển vì khác origin. Tại web cũ hãy tải sao lưu mã hóa, rồi Khôi phục ở web mới; hoặc mở snapshot đã đồng bộ trên Google Drive với cùng tài khoản và mật khẩu chính. Không nhập CSV để thay thế bản sao mã hóa nếu cần giữ đầy đủ kho.
+
+## Đăng nhập và sinh trắc học (0.4)
+
+Màn hình khóa chỉ có mật khẩu (mặc định ẩn), mở khóa bằng xác minh thiết bị khi đã bật và nút Cài đặt. Tạo kho, Import CSV, khôi phục và chọn Google Drive nằm trong Cài đặt.
+
+Sau khi mở kho bằng mật khẩu, chọn Cài đặt → Bật vân tay / khuôn mặt và xác nhận mật khẩu chính. WebAuthn platform passkey yêu cầu user verification; PRF + HKDF-SHA256 tạo khóa AES-256-GCM để bảo vệ mật khẩu chính. Chỉ lưu bản mã, credential ID, IV và salt; không lưu mật khẩu dạng rõ. Sinh trắc học do hệ điều hành quản lý. Có thể dùng PIN/mã khóa màn hình tùy thiết bị; ứng dụng không ép riêng vân tay hoặc khuôn mặt. Thiết bị/trình duyệt không có PRF sẽ từ chối bật tính năng và tiếp tục dùng mật khẩu. Không đồng bộ thiết lập mở khóa nhanh theo file sao lưu của kho. Passkey có thể được hệ điều hành đồng bộ tùy nhà cung cấp; thay kho sẽ vô hiệu thiết lập của kho cũ trên trình duyệt. Xóa thiết lập trong app không xóa passkey trong hệ điều hành.
+
+Sau lần nhập mật khẩu sai thứ 6, hỏi tạo database mới. Đây là gợi ý phục hồi, không phải cơ chế chống dò mật khẩu offline. Chỉ đếm lỗi xác thực AES-GCM; lỗi định dạng, hủy passkey hoặc lỗi mạng không tính là sai mật khẩu. Bộ đếm lưu trên trình duyệt và xóa khi mở kho thành công. Người dùng có thể hủy và thử tiếp.
+
+Tạo mới yêu cầu chọn lại Google bằng account chooser và nhập/xác nhận mật khẩu mới. Upload bản mã mới lên Drive thành công trước khi đổi kho hiện hành; nếu lỗi/hủy trước khi đổi, kho hiện hành không bị xóa. Bản mã trước đó được giữ riêng trên trình duyệt, có nút tải lại trong Cài đặt; các snapshot cũ trên Drive vẫn giữ. Cần mật khẩu cũ để đọc dữ liệu cũ. Mất mật khẩu và không có passkey hoạt động không thể giải mã kho cũ. Chưa kiểm thử sinh trắc học trên điện thoại thật; kiểm thử tự động dùng PRF và xác minh thiết bị giả lập.
+
+Tham chiếu PRF: https://www.w3.org/TR/webauthn-3/#prf-extension
