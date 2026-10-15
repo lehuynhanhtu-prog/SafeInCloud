@@ -13,7 +13,7 @@ test('six failures prompt reset; cancel and Drive errors preserve vault; success
  const elements=Object.fromEntries([...html.matchAll(/id="([^"]+)"/g)].map(x=>[x[1],new Element()]));
  elements.workspace.hidden=true;
  const storage=new Map();let uploads=0,uploadOK=false,selectCount=0;
- globalThis.document={getElementById:id=>{assert(elements[id],id);return elements[id]},querySelectorAll:()=>[],addEventListener(){},createElement:()=>new Element()};
+ globalThis.document={getElementById:id=>{assert(elements[id],id);return elements[id]},querySelectorAll:selector=>selector==='dialog[open]'?Object.values(elements).filter(e=>e.open):[],addEventListener(){},createElement:()=>new Element()};
  globalThis.localStorage={getItem:k=>storage.get(k)??null,setItem:(k,v)=>storage.set(k,v),removeItem:k=>storage.delete(k)};
  globalThis.window={addEventListener(){},google:{accounts:{oauth2:{initTokenClient:options=>({requestAccessToken:params=>{assert.equal(params.prompt,'select_account');selectCount++;options.callback({access_token:'synthetic-access-token',expires_in:3600})}})}}}};
  globalThis.google=window.google;
@@ -27,6 +27,8 @@ test('six failures prompt reset; cancel and Drive errors preserve vault; success
  const wait=async predicate=>{for(let i=0;i<1000;i++){if(predicate())return;await new Promise(r=>nativeTimeout(r,5))}throw Error('Timed out waiting for flow')};
  try{
   await import('../dist/app.js');
+  assert.equal(elements['first-setup'].hidden,true);
+  elements['workspace-settings'].onclick();assert.equal(elements.settings.open,false);
   for(let i=1;i<=6;i++){
    elements.master.value='wrong';elements['unlock-form'].onsubmit({preventDefault(){}});
    await wait(()=>JSON.parse(storage.get('safeincloud.failures.v1')||'{}').count===i);
@@ -46,5 +48,8 @@ test('six failures prompt reset; cancel and Drive errors preserve vault; success
   assert.equal(uploads,2);assert([...storage.keys()].some(k=>k.startsWith(store+'.previous.')&&storage.get(k)===original));
   assert.deepEqual((await open(JSON.parse(storage.get(store)),'new-synthetic-password')).items,[]);
   assert.equal(storage.has('safeincloud.failures.v1'),false);assert.equal(elements['new-password'].value,'');
+  elements['workspace-settings'].onclick();assert.equal(elements.settings.open,true);
+  elements.lock.onclick();assert.equal(elements.settings.open,false);
+  elements['workspace-settings'].onclick();assert.equal(elements.settings.open,false);
  }finally{globalThis.setInterval=nativeInterval;globalThis.setTimeout=nativeTimeout;}
 });
