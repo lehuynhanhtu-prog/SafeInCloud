@@ -1,0 +1,8 @@
+<resources>
+    <color name="sic_primary">#2859D9</color>
+    <color name="sic_primary_dark">#123CAA</color>
+    <color name="sic_secondary">#087F7B</color>
+    <color name="sic_background">#F5F7FC</color>
+    <color name="sic_surface">#FFFFFF</color>
+    <color name="sic_ink">#16213A</color>
+</resources>
