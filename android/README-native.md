@@ -1,6 +1,6 @@
-# SafeInCloud Android Native 1.1.0
+# SafeInCloud Android Native 1.1.1
 
-Android 8.0+ (minSdk 26), package `vn.safeincloud.personal`, versionCode 4.
+Android 8.0+ (minSdk 26), package `vn.safeincloud.personal`, versionCode 5.
 Giao diện Material 3 và xử lý kho viết bằng Java/Android Views; không có WebView, Custom Tabs hay JavaScript bridge. Form dùng nhãn nổi, nút ẩn/hiện tích hợp, thẻ thông tin và điều hướng dưới native. Cài đặt chỉ xuất hiện khi kho đã mở.
 
 ## Dữ liệu và bảo mật
