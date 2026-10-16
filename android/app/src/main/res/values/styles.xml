@@ -11,4 +11,12 @@
         <item name="android:navigationBarColor">@color/sic_surface</item>
         <item name="android:fontFamily">sans</item>
     </style>
+
+    <style name="TextAppearance.SafeInCloud.Navigation" parent="TextAppearance.Material3.LabelMedium">
+        <item name="android:textSize">12sp</item>
+        <item name="android:fontFamily">sans</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:includeFontPadding">false</item>
+        <item name="android:maxLines">1</item>
+    </style>
 </resources>
