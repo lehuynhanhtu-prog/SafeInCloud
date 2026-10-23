@@ -13,6 +13,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - run: npm ci
       - run: npm test
       - run: node --check dist/app.js
       - uses: actions/upload-artifact@v4
@@ -102,7 +103,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: |
-          gh release view downloads >/dev/null 2>&1 || gh release create downloads --target "$GITHUB_SHA" --title "SafeInCloud · Tải ứng dụng" --notes "SafeInCloud Native 1.1.1."
-          gh release edit downloads --notes $'## Tải và sử dụng SafeInCloud\n\n- **Web / PWA:** [Mở SafeInCloud trên trình duyệt](https://lehuynhanhtu-prog.github.io/SafeInCloud/)\n- **Android:** tải `SafeInCloud-Android.apk` trong phần Assets.\n- **Windows:** tải `SafeInCloud-Windows-x64.zip` trong phần Assets.\n\nAndroid Native 1.1.1: sửa bố cục thanh điều hướng dưới để biểu tượng và nhãn Kho, Phân loại, Cài đặt không chồng lên nhau. APK ký phát hành, kho offline, sinh trắc học Android Keystore, import CSV và tương thích file kho Web. Drive cần cấu hình OAuth Android theo `android/README-native.md`. Sao lưu kho trước khi chuyển từ bản debug cũ. Windows mở kho Web qua Edge. Chưa kiểm thử thiết bị thật hoặc kiểm toán độc lập.'
+          gh release view downloads >/dev/null 2>&1 || gh release create downloads --target "$GITHUB_SHA" --title "SafeInCloud · Tải ứng dụng" --notes "SafeInCloud Native 1.2.0."
+          gh release edit downloads --notes $'## Tải và sử dụng SafeInCloud\n\n- **Web / PWA:** [Mở SafeInCloud trên trình duyệt](https://lehuynhanhtu-prog.github.io/SafeInCloud/)\n- **Android:** tải `SafeInCloud-Android.apk` trong phần Assets.\n- **Windows:** tải `SafeInCloud-Windows-x64.zip` trong phần Assets.\n\nAndroid Native 1.2.0: thêm nhập trực tiếp SafeInCloud .db v1, hỏi mật khẩu sau khi chọn file, giữ trường tùy chỉnh và xuất AT_SafeInCloud.vault. APK ký phát hành, kho offline, sinh trắc học Android Keystore, import CSV và tương thích file kho Web. Drive cần cấu hình OAuth Android theo `android/README-native.md`. Sao lưu kho trước khi chuyển từ bản debug cũ. Windows mở kho Web qua Edge. Chưa kiểm thử thiết bị thật hoặc kiểm toán độc lập.'
           gh release upload downloads SafeInCloud-Android.apk SafeInCloud-Windows-x64.zip SHA256SUMS.txt --clobber
 
