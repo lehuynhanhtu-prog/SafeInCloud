@@ -1,3 +1,5 @@
+import {classifyImportedItem} from './category.js';
+
 // SafeInCloud legacy DB v1 import only. The destination remains our AES-GCM .vault.
 // Format reference: mxschmitt/golang-safe-in-cloud (MIT), decrypt.go.
 const MAX_FILE=10*1024*1024, MAX_XML=20*1024*1024;
@@ -46,6 +48,7 @@ export async function decryptDatabase(value,password){
 }
 const truth=s=>/^(true|1)$/i.test(s||'');
 const direct=(node,name)=>Array.from(node.childNodes||[]).filter(n=>n.nodeType===1&&n.nodeName===name);
+const isHistory=s=>{const value=String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();return value.includes('lich su')||value.includes('history');};
 function put(fields,name,value){let n=name||'Trường',i=2;while(Object.hasOwn(fields,n))n=`${name} (${i++})`;Object.defineProperty(fields,n,{value,enumerable:true});}
 const MIME={txt:'text/plain',csv:'text/csv',pdf:'application/pdf',png:'image/png',jpg:'image/jpeg',jpeg:'image/jpeg',gif:'image/gif',webp:'image/webp',svg:'image/svg+xml',doc:'application/msword',docx:'application/vnd.openxmlformats-officedocument.wordprocessingml.document',xls:'application/vnd.ms-excel',xlsx:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',zip:'application/zip'};
 function attachment(node,remaining){
@@ -66,7 +69,7 @@ export function parseDatabase(xml,Parser=globalThis.DOMParser){
  const doc=new Parser().parseFromString(xml,'application/xml');
  if(doc.getElementsByTagName('parsererror').length||doc.documentElement?.nodeName!=='database')throw Error('Nội dung .db không phải kho SafeInCloud hợp lệ.');
  const root=doc.documentElement,labels=new Map(direct(root,'label').map(l=>[l.getAttribute('id'),l.getAttribute('name')||'']));
- const items=[];let templates=0,deleted=0,attachments=0,skippedAttachments=0,attachmentBytes=0;
+ const items=[];let templates=0,deleted=0,attachments=0,skippedAttachments=0,attachmentBytes=0,skippedHistory=0;
  for(const card of direct(root,'card')){
   if(truth(card.getAttribute('template'))){templates++;continue;}
   if(truth(card.getAttribute('deleted'))){deleted++;continue;}
@@ -74,21 +77,22 @@ export function parseDatabase(xml,Parser=globalThis.DOMParser){
   const fields={},originalFields=[];
   for(const f of direct(card,'field')){
    const type=f.getAttribute('type')||'',original=f.getAttribute('name')||'Trường';
+   if(isHistory(original)){skippedHistory++;continue;}
    const names={login:'Login',password:'Password',website:'URL',otp:'OTP',totp:'OTP',notes:'Notes'};const canonical=Object.hasOwn(names,type)?names[type]:null;
    put(fields,canonical&&!Object.hasOwn(fields,canonical)?canonical:original,f.textContent||'');
-   const attrs=Object.fromEntries(Array.from(f.attributes).map(a=>[a.name,a.value]));originalFields.push(attrs);
-   if(f.getAttribute('history'))put(fields,`Lịch sử · ${original}`,f.getAttribute('history'));
+   const attrs=Object.fromEntries(Array.from(f.attributes).map(a=>[a.name,a.value]));
+   if(Object.hasOwn(attrs,'history')){if(attrs.history)skippedHistory++;delete attrs.history;}
+   originalFields.push(attrs);
   }
   const notes=direct(card,'notes').map(n=>n.textContent||'').join('\n');if(notes)put(fields,'Notes',notes);
   const tags=direct(card,'label_id').map(n=>labels.get(n.textContent.trim())||n.textContent.trim());if(tags.length)put(fields,'Nhãn',tags.join(', '));
   const files=[];
   for(const f of direct(card,'file'))try{const parsed=attachment(f,MAX_ATTACHMENTS-attachmentBytes);files.push(parsed);attachmentBytes+=parsed.size;attachments++;}catch{skippedAttachments++;}
-  const hint=tags.join(' ').toLowerCase();let category='WEB';
-  if(/credit|thẻ tín dụng/.test(hint))category='Thẻ tín dụng';else if(/email|e-mail/.test(hint))category='Email';else if(/khóa cửa/.test(hint))category='Khóa cửa';else if(/ứng dụng|application/.test(hint))category='APP';
+  const category=classifyImportedItem({tags,url:fields.URL,login:fields.Login});
   const item={id:crypto.randomUUID(),title:card.getAttribute('title')||'Chưa đặt tên',category,fields,updatedAt:new Date().toISOString(),source:{format:'SafeInCloud-db-v1',attributes:Object.fromEntries(Array.from(card.attributes).map(a=>[a.name,a.value])),fields:originalFields}};
   if(files.length)item.attachments=files;
   items.push(item);
  }
- return {items,templates,deleted,labels:labels.size,attachments,skippedAttachments,attachmentBytes};
+ return {items,templates,deleted,labels:labels.size,attachments,skippedAttachments,attachmentBytes,skippedHistory};
 }
 export async function importDatabase(value,password,Parser){return parseDatabase(await decryptDatabase(value,password),Parser);}
