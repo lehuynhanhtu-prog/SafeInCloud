@@ -37,12 +37,21 @@ test('truncated, unsupported, damaged or oversized databases are rejected',async
  await assert.rejects(decryptDatabase(data,''),/nhập mật khẩu/);
 });
 
-test('reject XML entities, invalid roots, attachments and expansion bombs instead of partial import',()=>{
+test('reject XML entities, invalid roots and expansion bombs',()=>{
  assert.throws(()=>parseDatabase('<!DOCTYPE database [<!ENTITY test SYSTEM "file:///etc/passwd">]><database>&test;</database>',DOMParser));
  assert.throws(()=>parseDatabase('<wrong/>',DOMParser));
- assert.throws(()=>parseDatabase('<database><card><file name="example">FAKE</file></card></database>',DOMParser),/đính kèm/);
  assert.throws(()=>inflateLegacy(deflateSync('x'.repeat(100000)),500),/20 MB/);
  const z=deflateSync('checksum');z[z.length-1]^=1;assert.throws(()=>inflateLegacy(z,100));
+});
+
+test('imports readable attachments, preserves them in the encrypted vault and skips broken files',async()=>{
+ const source='<database><card id="1" title="Có tệp"><file name="ghi-chu.txt">SGVsbG8gU2FmZQ==</file><file name="hong.bin">%%%broken%%%</file></card></database>';
+ const result=parseDatabase(source,DOMParser);
+ assert.equal(result.attachments,1);assert.equal(result.skippedAttachments,1);assert.equal(result.attachmentBytes,10);
+ assert.deepEqual(result.items[0].attachments,[{name:'ghi-chu.txt',type:'text/plain',size:10,data:'SGVsbG8gU2FmZQ=='}]);
+ const salt=crypto.getRandomValues(new Uint8Array(16)),key=await derive('destination-password',salt),vault=await seal(result.items,key,salt);
+ assert(!JSON.stringify(vault).includes('SGVsbG8gU2FmZQ=='));
+ assert.deepEqual((await open(vault,'destination-password')).items[0].attachments,result.items[0].attachments);
 });
 
 test('large synthetic legacy database imports every active card',async()=>{

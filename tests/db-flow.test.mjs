@@ -5,7 +5,7 @@ import {DOMParser} from '@xmldom/xmldom';
 import {derive,seal,open} from '../dist/crypto.js';
 import {encryptLegacy,password} from './safe-db-fixture.mjs';
 
-test('DB UI prompts after selection; wrong password, cancellation and locking preserve vault; confirmed import is encrypted',async()=>{
+test('DB UI prompts after selection; wrong password, cancellation and locking preserve vault; attachments are encrypted or skipped on quota failure',async()=>{
  class Element{
   constructor(){this.value='';this.hidden=false;this.children=[];this.open=false;this.dataset={};this.events={};this.type='password';this.tagName='DIV';this.disabled=false;}
   replaceChildren(...items){this.children=items;}append(...items){this.children.push(...items);}setAttribute(){}focus(){}click(){}
@@ -15,12 +15,12 @@ test('DB UI prompts after selection; wrong password, cancellation and locking pr
  const html=await readFile(new URL('../dist/index.html',import.meta.url),'utf8');
  const elements=Object.fromEntries([...html.matchAll(/id="([^"]+)"/g)].map(x=>[x[1],new Element()]));
  elements.workspace.hidden=true;
- const storage=new Map(),store='safeincloud.vault.v1';
+ const storage=new Map(),store='safeincloud.vault.v1';let quotaOnce=false;
  const original=JSON.stringify(await seal([{id:'existing',title:'Existing',category:'WEB',fields:{Login:'existing'}}],await derive('destination-password',new Uint8Array(16)),new Uint8Array(16)));
  storage.set(store,original);
  globalThis.DOMParser=DOMParser;
  globalThis.document={getElementById:id=>elements[id],querySelectorAll:selector=>selector==='dialog[open]'?Object.values(elements).filter(e=>e.open):[],addEventListener(){},createElement:tag=>{const e=new Element();e.tagName=tag.toUpperCase();return e;}};
- globalThis.localStorage={getItem:k=>storage.get(k)??null,setItem:(k,v)=>storage.set(k,v),removeItem:k=>storage.delete(k)};
+ globalThis.localStorage={getItem:k=>storage.get(k)??null,setItem:(k,v)=>{if(k===store&&quotaOnce){quotaOnce=false;const error=Error('quota exceeded');error.name='QuotaExceededError';throw error}storage.set(k,v)},removeItem:k=>storage.delete(k)};
  globalThis.window={addEventListener(){},dispatchEvent(){}};
  Object.defineProperty(globalThis,'navigator',{configurable:true,value:{locks:{request:async(_,fn)=>fn()}}});
  const nativeInterval=setInterval,nativeTimeout=setTimeout;globalThis.setInterval=()=>0;globalThis.setTimeout=()=>0;
@@ -30,11 +30,13 @@ test('DB UI prompts after selection; wrong password, cancellation and locking pr
  const unlock=async()=>{elements.master.value='destination-password';elements['unlock-form'].onsubmit({preventDefault(){}});await wait(()=>!elements.workspace.hidden);};
  try{
   await import('../dist/app.js');await unlock();
-  const fixture=new Uint8Array(encryptLegacy('<database><card id="1" title="Imported"><field name="Password" type="password">synthetic-only</field></card></database>'));
+  const fixture=new Uint8Array(encryptLegacy('<database><card id="1" title="Imported"><field name="Password" type="password">synthetic-only</field><file name="proof.txt">c3ludGhldGljIGF0dGFjaG1lbnQ=</file></card></database>'));
   await select(fixture);assert.equal(storage.get(store),original);submit('wrong');await wait(()=>!elements['db-decrypt'].disabled);assert.match(elements['db-status'].textContent,/Không giải mã được/);assert.equal(storage.get(store),original);
   submit(password);await wait(()=>elements.confirm.open);elements['confirm-no'].onclick();await wait(()=>!elements.confirm.open);assert.equal(storage.get(store),original);
   await select(fixture);submit(password);elements.lock.onclick();await new Promise(r=>nativeTimeout(r,50));assert.equal(elements.confirm.open,false);assert.equal(storage.get(store),original);assert.equal(elements['db-import'].open,false);
   await unlock();await select(fixture);submit(password);await wait(()=>elements.confirm.open);elements['confirm-yes'].onclick();await wait(()=>storage.get(store)!==original);
-  const saved=storage.get(store);assert(!saved.includes('synthetic-only'));const result=await open(JSON.parse(saved),'destination-password');assert.equal(result.items.length,2);assert.equal(result.items[0].id,'existing');assert.equal(result.items[1].fields.Password,'synthetic-only');
+  const saved=storage.get(store);assert(!saved.includes('synthetic-only'));assert(!saved.includes('c3ludGhldGljIGF0dGFjaG1lbnQ='));const result=await open(JSON.parse(saved),'destination-password');assert.equal(result.items.length,2);assert.equal(result.items[0].id,'existing');assert.equal(result.items[1].fields.Password,'synthetic-only');assert.equal(result.items[1].attachments[0].name,'proof.txt');assert.equal(result.items[1].attachments[0].size,20);
+  await select(fixture);submit(password);await wait(()=>elements.confirm.open);quotaOnce=true;elements['confirm-yes'].onclick();await wait(()=>storage.get(store)!==saved);
+  const fallback=await open(JSON.parse(storage.get(store)),'destination-password');assert.equal(fallback.items.length,3);assert.equal(fallback.items[2].fields.Password,'synthetic-only');assert.equal(fallback.items[2].attachments,undefined);assert.match(elements.toast.textContent,/bỏ qua 1 tệp/i);
  }finally{globalThis.setInterval=nativeInterval;globalThis.setTimeout=nativeTimeout;}
 });
