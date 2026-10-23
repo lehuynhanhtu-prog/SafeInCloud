@@ -1,6 +1,6 @@
-# SafeInCloud Android Native 1.1.1
+# SafeInCloud Android Native 1.2.0
 
-Android 8.0+ (minSdk 26), package `vn.safeincloud.personal`, versionCode 5.
+Android 8.0+ (minSdk 26), package `vn.safeincloud.personal`, versionCode 6.
 Giao diện Material 3 và xử lý kho viết bằng Java/Android Views; không có WebView, Custom Tabs hay JavaScript bridge. Form dùng nhãn nổi, nút ẩn/hiện tích hợp, thẻ thông tin và điều hướng dưới native. Cài đặt chỉ xuất hiện khi kho đã mở.
 
 ## Dữ liệu và bảo mật
@@ -34,3 +34,11 @@ Trước khi gỡ APK debug cũ, xuất bản sao `.vault` từ Web hoặc lưu 
 GitHub Actions giải mã keystore từ Secrets vào RUNNER_TEMP, chạy `testDebugUnitTest assembleRelease`, kiểm tra fingerprint APK rồi xóa keystore tạm. Không fallback về debug/unsigned nếu thiếu Secrets. Các secret: ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS, ANDROID_KEY_PASSWORD.
 
 Kiểm thử: mở fixture do Web tạo bằng mật khẩu Unicode, round trip AES-GCM, chống sửa bản mã/sai mật khẩu, IV ngẫu nhiên, xóa byte khóa session, CSV dấu ngoặc kép/newline/OTP. Build thành công không thay cho kiểm thử thiết bị: chưa xác nhận biometric, SAF hoặc Google OAuth trên điện thoại thật. Chưa kiểm toán bảo mật độc lập.
+
+## Nhập .db phiên bản 1.2.0
+
+Cài đặt → Nhập SafeInCloud .db → chọn file → nhập mật khẩu file nguồn → Giải mã → xác nhận số mục để thêm vào kho đang mở. Giữ trường tùy chỉnh/ghi chú/nhãn; bỏ qua mẫu và mục đã xóa. Mục trùng vẫn được nhập. Không thay kho cũ và không lưu mật khẩu nguồn. Giải mã, kiểm tra zlib/XML trên thiết bị rồi mã hóa lại bằng khóa kho hiện tại.
+
+Chỉ hỗ trợ legacy v1 (magic 0x0505/version 1), file tối đa 10 MB, XML tối đa 20 MB, tổng tối đa 20.000 mục. Kho có tệp đính kèm hoặc phiên bản chưa hỗ trợ bị từ chối. File xuất và tên snapshot Drive: `AT_SafeInCloud.vault`; format `.vault` không đổi và vẫn mở được bằng Web. Snapshot mới không ghi đè snapshot Drive trước đó.
+
+Có fixture dữ liệu giả dùng chung Web/Android để kiểm tra mật khẩu Unicode, giải mã và chuyển trường. Không dùng file thật hoặc mật khẩu người dùng trong mã nguồn, fixture hoặc log.

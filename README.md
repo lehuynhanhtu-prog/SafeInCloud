@@ -1,4 +1,4 @@
-# SafeInCloud cá nhân · 0.2.0
+# SafeInCloud cá nhân · 0.5.0
 Ứng dụng độc lập, không liên kết với nhà phát hành SafeInCloud thương mại.
 
 Repository: https://github.com/lehuynhanhtu-prog/SafeInCloud
@@ -6,7 +6,7 @@ Repository: https://github.com/lehuynhanhtu-prog/SafeInCloud
 ## Chức năng
 Kho mật khẩu APP, WEB, thẻ tín dụng, khóa cửa, email; thêm/sửa/xóa, tìm kiếm, trường tùy chỉnh, tạo mật khẩu, nhập CSV SafeInCloud với các cột chính xác `Title,Login,Password,URL,Notes,OTP`, sao lưu/khôi phục mã hóa, Google Drive.
 
-Web/PWA là ứng dụng chính. Android Native 1.0.0 dùng Android Views, Android Keystore và BiometricPrompt, không dùng WebView/Custom Tabs. Hướng dẫn Google và chuyển kho: [android/README-native.md](android/README-native.md). Windows vẫn mở Web qua Edge app mode. Bản Web dự kiến triển khai trên GitHub Pages: https://lehuynhanhtu-prog.github.io/SafeInCloud/ Cài PWA bằng trình duyệt có hỗ trợ. Không có chức năng tự điền mật khẩu hệ thống hay sinh mã OTP; trường OTP được giữ nguyên khi nhập.
+Web/PWA là ứng dụng chính. Android Native 1.2.0 dùng Android Views, Android Keystore và BiometricPrompt, không dùng WebView/Custom Tabs. Hướng dẫn Google và chuyển kho: [android/README-native.md](android/README-native.md). Windows vẫn mở Web qua Edge app mode. Bản Web dự kiến triển khai trên GitHub Pages: https://lehuynhanhtu-prog.github.io/SafeInCloud/ Cài PWA bằng trình duyệt có hỗ trợ. Không có chức năng tự điền mật khẩu hệ thống hay sinh mã OTP; trường OTP được giữ nguyên khi nhập.
 
 File mẫu đính kèm có sáu cột và 115 dòng trống, không chứa tài khoản/mật khẩu. Bộ nhập bỏ qua các dòng trống.
 
@@ -24,7 +24,7 @@ AES-256-GCM với IV ngẫu nhiên 96-bit mỗi lần lưu; PBKDF2-HMAC-SHA256 6
 CSV được xử lý trên thiết bị khi người dùng nhập; file thật và dữ liệu nhập không có trong repository. Không gửi thông tin mật khẩu qua analytics/log. Không lưu thẻ vào thanh toán, không xử lý giao dịch. Thiết bị nhiễm mã độc, extension độc hại hoặc mã nguồn web bị thay thế vẫn có thể đọc kho đang mở. Đây là bản đầu đã kiểm tra chức năng mã hóa, chưa được kiểm toán bảo mật độc lập. Không thể phục hồi kho nếu mất mật khẩu chính. Giữ bản sao mã hóa ở nơi an toàn.
 
 ## Chạy và build
-Node 22+: `npm test`. Chạy local: `npm start`, mở localhost:8080. OAuth cần localhost origin tương ứng. HTTPS bắt buộc khi xuất bản; localStorage và Web Locks cần trình duyệt hiện đại.
+Node 22+: `npm ci` rồi `npm test`. Chạy local: `npm start`, mở localhost:8080. OAuth cần localhost origin tương ứng. HTTPS bắt buộc khi xuất bản; localStorage và Web Locks cần trình duyệt hiện đại.
 
 GitHub Actions `build.yml` chạy kiểm tra và tạo Web, APK native release có chữ ký cố định và Windows executable. APK được kiểm tra fingerprint release trước khi tải lên. Bản Windows chưa có Authenticode. Cần chạy workflow sau khi repository được tạo và tải artifact. Chưa kiểm thử trực tiếp trên Android/Windows trong môi trường hiện tại.
 
@@ -46,3 +46,20 @@ Sau lần nhập mật khẩu sai thứ 6, hỏi tạo database mới. Đây là
 Tạo mới yêu cầu chọn lại Google bằng account chooser và nhập/xác nhận mật khẩu mới. Upload bản mã mới lên Drive thành công trước khi đổi kho hiện hành; nếu lỗi/hủy trước khi đổi, kho hiện hành không bị xóa. Bản mã trước đó được giữ riêng trên trình duyệt, có nút tải lại trong Cài đặt; các snapshot cũ trên Drive vẫn giữ. Cần mật khẩu cũ để đọc dữ liệu cũ. Mất mật khẩu và không có passkey hoạt động không thể giải mã kho cũ. Chưa kiểm thử sinh trắc học trên điện thoại thật; kiểm thử tự động dùng PRF và xác minh thiết bị giả lập.
 
 Tham chiếu PRF: https://www.w3.org/TR/webauthn-3/#prf-extension
+
+
+## Nhập trực tiếp SafeInCloud .db (Web 0.5 / Android 1.2.0)
+
+Mở hoặc tạo kho đích trước. Chọn **Nhập SafeInCloud .db** trong thanh công cụ Web hoặc Cài đặt → chọn file `.db` → nhập **mật khẩu của file nguồn** → Giải mã → kiểm tra số mục → xác nhận nhập. Mật khẩu nguồn có thể khác mật khẩu chính của kho đích. Sai mật khẩu, hủy hoặc khóa kho trước khi xác nhận không làm thay đổi kho hiện tại. Không ghi nhớ mật khẩu nguồn và không gửi file/dữ liệu giải mã lên mạng.
+
+Bộ nhập hỗ trợ định dạng SafeInCloud legacy v1 (magic 0x0505, version 1), PBKDF2-HMAC-SHA1 10.000 vòng, hai lớp AES-256-CBC, zlib và XML. Thuật toán này chỉ dùng để đọc file nguồn; dữ liệu nhập được mã hóa lại trong kho `.vault` bằng AES-256-GCM/PBKDF2-SHA256 600.000 vòng. Không thay định dạng kho hiện có. Đây là ứng dụng độc lập, không phải Safe thương mại.
+
+Giữ các trường tùy chỉnh, ghi chú, nhãn, lịch sử trường có trong XML; trường trùng tên được thêm hậu tố thay vì ghi đè. Login/Password/URL/OTP được ánh xạ theo kiểu trường nguồn; nhãn có thể gợi ý nhóm, mặc định WEB. Các thuộc tính nguồn được giữ trong bản ghi đã mã hóa. Bỏ qua mẫu và mục đánh dấu đã xóa. Hiện chưa hỗ trợ tệp đính kèm: kho có phần tử `file` sẽ bị từ chối, không nhập thiếu dữ liệu âm thầm. Chưa cam kết các phiên bản `.db` khác hoặc chuyển passkey.
+
+Giới hạn: file nguồn 10 MB, XML giải nén 20 MB, tổng kho đích tối đa 20.000 mục. Không hợp nhất hoặc loại trùng: nhập lại sẽ tạo mục mới. Giữ nguyên file nguồn. Có kiểm tra checksum zlib và cấu trúc XML; định dạng CBC nguồn không cung cấp bảo đảm xác thực như kho AES-GCM đích. XML có DOCTYPE/ENTITY bị từ chối.
+
+File sao lưu tải về có tên **AT_SafeInCloud.vault**. Snapshot Drive cũng có tên này; mỗi lần lưu vẫn tạo một snapshot mới có ID riêng, không ghi đè bản cũ. Đuôi `.vault` thể hiện định dạng riêng của app; không phải file `.db` để Safe thương mại mở lại.
+
+Kiểm thử sử dụng hoàn toàn dữ liệu giả: fixture dùng chung Web/Android với mật khẩu Unicode, giữ trường tùy chỉnh/ghi chú/nhãn, sai mật khẩu, file hỏng/thiếu, phiên bản không hỗ trợ, XML độc hại, giới hạn giải nén, kho lớn và luồng hủy/khóa/xác nhận Web. File kho thật và mật khẩu người dùng không được đưa vào repository.
+
+Bộ giải nén pako 2.1.0 được đóng gói cục bộ để PWA hoạt động offline, không cần CDN; giấy phép ở `dist/vendor/PAKO-LICENSE.txt`. Tham khảo định dạng: https://github.com/mxschmitt/golang-safe-in-cloud (MIT). Chưa kiểm thử UI trên thiết bị Android thật.

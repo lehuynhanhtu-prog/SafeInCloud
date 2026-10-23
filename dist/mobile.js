@@ -4,7 +4,7 @@ let screen='vault',afterBack=null;
 const nav=document.createElement('nav');nav.className='mobile-nav';nav.setAttribute('aria-label','Điều hướng ứng dụng');
 const back=document.createElement('button');back.className='mobile-back';back.type='button';back.textContent='‹ Quay lại';back.onclick=()=>history.back();$('detail').before(back);
 const panel=document.createElement('section');panel.className='mobile-data';panel.innerHTML='<p class="eyebrow">DỮ LIỆU & BẢO MẬT</p><h2>Quản lý kho</h2><p class="hint">Sao lưu mã hóa và sử dụng cùng kho trên các thiết bị.</p>'; 
-const groups=[['Đăng nhập & bảo mật','workspace-settings'],['Đồng bộ Google Drive','sync'],['Nhập file CSV','import'],['Sao lưu mã hóa','backup'],['Khôi phục bản sao','restore'],['Khóa kho ngay','lock']];
+const groups=[['Đăng nhập & bảo mật','workspace-settings'],['Đồng bộ Google Drive','sync'],['Nhập SafeInCloud .db','import-db'],['Nhập file CSV','import'],['Sao lưu mã hóa','backup'],['Khôi phục bản sao','restore'],['Khóa kho ngay','lock']];
 for(const [label,id]of groups){const b=document.createElement('button');b.type='button';b.textContent=label+'  ›';b.onclick=()=>$(id).click();panel.append(b)}
 $('workspace').append(panel,nav);
 function show(next){screen=next;document.body.dataset.mobileScreen=next;for(const b of nav.children)b.setAttribute('aria-current',String(b.dataset.screen===next));if(next==='vault')$('view-title').textContent='Kho mật khẩu';}
