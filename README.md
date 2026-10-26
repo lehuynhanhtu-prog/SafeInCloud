@@ -1,10 +1,10 @@
-# SafeInCloud cá nhân · 0.5.2
+# SafeInCloud cá nhân · 0.5.3
 Ứng dụng độc lập, không liên kết với nhà phát hành SafeInCloud thương mại.
 
 Repository: https://github.com/lehuynhanhtu-prog/SafeInCloud
 
 ## Chức năng
-Kho mật khẩu APP, WEB, thẻ tín dụng, khóa cửa, email; thêm/sửa/xóa, tìm kiếm, trường tùy chỉnh, tạo mật khẩu, nhập CSV SafeInCloud với các cột chính xác `Title,Login,Password,URL,Notes,OTP`, sao lưu/khôi phục mã hóa, Google Drive.
+Kho mật khẩu APP, WEB, Email, Bank, thẻ tín dụng và khóa cửa; thêm/sửa/xóa, tìm kiếm, trường tùy chỉnh dạng văn bản hoặc mật khẩu, tạo mật khẩu, nhập CSV SafeInCloud với các cột chính xác `Title,Login,Password,URL,Notes,OTP`, sao lưu/khôi phục mã hóa, Google Drive.
 
 Web/PWA là ứng dụng chính. Android Native 1.2.0 dùng Android Views, Android Keystore và BiometricPrompt, không dùng WebView/Custom Tabs. Hướng dẫn Google và chuyển kho: [android/README-native.md](android/README-native.md). Windows vẫn mở Web qua Edge app mode. Bản Web dự kiến triển khai trên GitHub Pages: https://lehuynhanhtu-prog.github.io/SafeInCloud/ Cài PWA bằng trình duyệt có hỗ trợ. Không có chức năng tự điền mật khẩu hệ thống hay sinh mã OTP; trường OTP được giữ nguyên khi nhập.
 
@@ -48,15 +48,15 @@ Tạo mới yêu cầu chọn lại Google bằng account chooser và nhập/xá
 Tham chiếu PRF: https://www.w3.org/TR/webauthn-3/#prf-extension
 
 
-## Nhập trực tiếp SafeInCloud .db (Web 0.5.2 / Android 1.2.0)
+## Nhập trực tiếp SafeInCloud .db (Web 0.5.3 / Android 1.2.0)
 
 Mở hoặc tạo kho đích trước. Chọn **Cài đặt → Nhập dữ liệu → Nhập SafeInCloud .db** → chọn file `.db` → nhập **mật khẩu của file nguồn** → Giải mã → kiểm tra số mục → xác nhận nhập. Mật khẩu nguồn có thể khác mật khẩu chính của kho đích. Sai mật khẩu, hủy hoặc khóa kho trước khi xác nhận không làm thay đổi kho hiện tại. Không ghi nhớ mật khẩu nguồn và không gửi file/dữ liệu giải mã lên mạng.
 
 Bộ nhập hỗ trợ định dạng SafeInCloud legacy v1 (magic 0x0505, version 1), PBKDF2-HMAC-SHA1 10.000 vòng, hai lớp AES-256-CBC, zlib và XML. Thuật toán này chỉ dùng để đọc file nguồn; dữ liệu nhập được mã hóa lại trong kho `.vault` bằng AES-256-GCM/PBKDF2-SHA256 600.000 vòng. Không thay định dạng kho hiện có. Đây là ứng dụng độc lập, không phải Safe thương mại.
 
-Giữ các trường tùy chỉnh, ghi chú và `Nhãn`; bỏ qua trường có tên chứa `Lịch sử`/`History` và không nhập giá trị history cũ của trường nguồn. Trường trùng tên được thêm hậu tố thay vì ghi đè. Login/Password/URL/OTP được ánh xạ theo kiểu trường nguồn. Web tự phân loại khi nhập: nhãn `Web Logins` hoặc mục có URL → WEB; nhãn/tài khoản email → Email; nhãn thẻ tín dụng và khóa cửa → loại tương ứng; còn lại → APP. CSV cũng dùng quy tắc URL/email/APP này. Các thuộc tính nguồn còn lại được giữ trong bản ghi đã mã hóa. Bỏ qua mẫu và mục đánh dấu đã xóa. Web mặc định phục hồi tệp đính kèm, mã hóa chúng cùng kho đích và cho tải xuống trong chi tiết mục. Tệp hỏng, tệp trên 4 MB hoặc khi tổng tệp nhập vượt 6 MB sẽ được bỏ qua; nếu trình duyệt hết dung lượng lưu trữ, các mục vẫn được nhập nhưng toàn bộ tệp đính kèm của lần nhập đó bị bỏ qua. Android 1.2.0 chưa có thay đổi này. Chưa cam kết các phiên bản `.db` khác hoặc chuyển passkey.
+Web chuẩn hóa dữ liệu `.db` thành `Name` (tên mục), `Login`, `Password`, `PIN`, `URL`, `Note`, `Label`; các trường khác được ghép vào `Note` theo dạng `Tên trường: giá trị`. Bỏ qua trường chứa `Lịch sử`/`History` và giá trị history cũ. Login dạng email tự bổ sung `Email` vào `Label`. Nhãn `Bank` tạo loại Bank và trường `Account`; `Web Logins` hoặc mục có URL → WEB; nhãn/tài khoản email → Email; nhãn thẻ tín dụng và khóa cửa → loại tương ứng; còn lại → APP. Các thuộc tính nguồn còn lại được giữ trong bản ghi đã mã hóa. Bỏ qua mẫu và mục đánh dấu đã xóa. Web mặc định phục hồi tệp đính kèm, mã hóa chúng cùng kho đích và cho tải xuống trong chi tiết mục. Tệp hỏng, tệp trên 4 MB hoặc khi tổng tệp nhập vượt 6 MB sẽ được bỏ qua; nếu trình duyệt hết dung lượng lưu trữ, các mục vẫn được nhập nhưng toàn bộ tệp đính kèm của lần nhập đó bị bỏ qua. Android 1.2.0 chưa có thay đổi này. Chưa cam kết các phiên bản `.db` khác hoặc chuyển passkey.
 
-Trên Web, Import `.db`/CSV, đồng bộ Drive, sao lưu, khôi phục và trang tải ứng dụng đều nằm trong **Cài đặt**. Giao diện kho dùng hai cột trên màn hình lớn, chuyển sang bố cục gọn trên máy tính bảng và điều hướng đáy với Cài đặt toàn màn hình trên điện thoại.
+Trên Web, Import `.db`/CSV, đồng bộ Drive, sao lưu, khôi phục, tải ứng dụng và **Xóa toàn bộ dữ liệu** đều nằm trong **Cài đặt**. Xóa toàn bộ làm rỗng các mục/tệp đính kèm của kho hiện tại sau xác nhận nhưng giữ mật khẩu kho và bản sao lưu cũ. Giao diện kho dùng hai cột trên màn hình lớn, chuyển sang bố cục gọn trên máy tính bảng và điều hướng đáy với Cài đặt toàn màn hình trên điện thoại. Khi thêm hoặc sửa mục, mỗi trường mới có thể chọn kiểu **Văn bản** hoặc **Mật khẩu**.
 
 Giới hạn: file nguồn 10 MB, XML giải nén 20 MB, tổng kho đích tối đa 20.000 mục. Không hợp nhất hoặc loại trùng: nhập lại sẽ tạo mục mới. Giữ nguyên file nguồn. Có kiểm tra checksum zlib và cấu trúc XML; định dạng CBC nguồn không cung cấp bảo đảm xác thực như kho AES-GCM đích. XML có DOCTYPE/ENTITY bị từ chối.
 
