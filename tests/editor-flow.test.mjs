@@ -2,6 +2,7 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {derive,seal,open} from '../dist/crypto.js';
+import {liveItems} from '../dist/sync.js';
 
 test('custom fields retain explicit text/password types and settings can clear every item',async()=>{
  class Element{
@@ -35,6 +36,6 @@ test('custom fields retain explicit text/password types and settings can clear e
   assert(record);assert.equal(record.category,'Bank');assert.equal(record.fields.Account,'');assert.equal(record.fields['Secret answer'],'synthetic-secret');assert.equal(record.fieldTypes['Secret answer'],'password');
   elements['workspace-settings'].onclick();assert(elements.settings.open);elements['clear-all'].onclick();await wait(()=>elements.confirm.open);assert.equal(elements.settings.open,false);
   const beforeClear=storage.get(store);elements['confirm-yes'].onclick();await wait(()=>storage.get(store)!==beforeClear);
-  saved=await open(JSON.parse(storage.get(store)),password);assert.deepEqual(saved.items,[]);assert.match(elements.toast.textContent,/xóa toàn bộ dữ liệu/i);
+  saved=await open(JSON.parse(storage.get(store)),password);assert.deepEqual(liveItems(saved.items),[]);assert(saved.items.every(item=>item.deletedAt));assert.match(elements.toast.textContent,/xóa toàn bộ dữ liệu/i);
  }finally{globalThis.setInterval=nativeInterval;globalThis.setTimeout=nativeTimeout}
 });

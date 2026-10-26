@@ -1,6 +1,6 @@
-# SafeInCloud Android Native 1.3.1
+# SafeInCloud Android Native 1.3.2
 
-Android 8.0+ (minSdk 26), package `vn.safeincloud.personal`, versionCode 8.
+Android 8.0+ (minSdk 26), package `vn.safeincloud.personal`, versionCode 9.
 Giao diện Material 3 và xử lý kho viết bằng Java/Android Views; không có WebView, Custom Tabs hay JavaScript bridge. Form dùng nhãn nổi, nút ẩn/hiện tích hợp, thẻ thông tin và điều hướng dưới native. Cài đặt chỉ xuất hiện khi kho đã mở.
 
 ## Dữ liệu và bảo mật
@@ -23,7 +23,9 @@ Tạo OAuth client loại **Android** trong Google Auth Platform/Clients với:
 
 Chỉ xin scope `https://www.googleapis.com/auth/drive.appdata`. Dùng Google AccountPicker luôn cho chọn lại tài khoản, sau đó Google Identity AuthorizationClient xin quyền. Không cần nhúng client secret hay Web Client ID. OAuth consent/Test users theo trạng thái dự án hiện có. Nếu đăng nhập báo cấu hình chưa đúng, kiểm tra cặp package/SHA-1 và scope của dự án. Đăng ký Android OAuth và kiểm thử tài khoản thật chưa được thực hiện trong phiên build này.
 
-Nguyên tắc: một email Google giữ một file hiện hành `AT_SafeInCloud.vault`. Web, APK và Windows Portable dùng cùng email sẽ đọc/ghi cùng kho. Cài đặt hiển thị email đang đồng bộ và từ chối tài khoản khác. Đồng bộ cập nhật file hiện hành bằng PATCH thay vì tạo snapshot mới. Nếu thiết bị chưa có dữ liệu, nút **Đồng bộ từ tài khoản Google** tải kho chung về. Hash lần đồng bộ gần nhất xác định chiều cập nhật; khi cả hai phía cùng đổi, Google là nguồn chung nhưng cần xác nhận trước khi thay bản cục bộ.
+Nguyên tắc: một email Google giữ một file hiện hành `AT_SafeInCloud.vault`. APK luôn lưu mã hóa vào bộ nhớ private trước, kể cả khi ngoại tuyến. Khi có mạng và email đã gắn, ứng dụng thử cấp quyền lại im lặng rồi tự đồng bộ lúc mở khóa, khi mạng trở lại, sau thêm/sửa/xóa/import và định kỳ mỗi phút trong phiên mở. Web và APK hợp nhất theo từng `id`/`updatedAt`; thao tác xóa được giữ thành dấu xóa để truyền sang thiết bị khác. Sau đó file hiện hành được PATCH tại chỗ. Nếu Google cần người dùng xác nhận lại quyền, kho cục bộ vẫn hoạt động và nút **Đồng bộ tài khoản Google** mở luồng cấp quyền thủ công.
+
+Nếu thiết bị chưa có dữ liệu, nút **Đồng bộ từ tài khoản Google** tải kho chung về. Kho local được tạo độc lập với salt hoặc mật khẩu khác kho Google sẽ không bị ghi đè tự động; ứng dụng báo lỗi để người dùng sao lưu rồi chọn đúng kho chung.
 
 ## Chuyển từ APK cũ
 
@@ -35,7 +37,7 @@ GitHub Actions giải mã keystore từ Secrets vào RUNNER_TEMP, chạy `testDe
 
 Kiểm thử: mở fixture do Web tạo bằng mật khẩu Unicode, round trip AES-GCM, chống sửa bản mã/sai mật khẩu, IV ngẫu nhiên, xóa byte khóa session, CSV dấu ngoặc kép/newline/OTP. Build thành công không thay cho kiểm thử thiết bị: chưa xác nhận biometric, SAF hoặc Google OAuth trên điện thoại thật. Chưa kiểm toán bảo mật độc lập.
 
-## Nhập .db phiên bản 1.3.1
+## Nhập .db phiên bản 1.3.2
 
 Cài đặt → Nhập SafeInCloud .db → chọn file → nhập mật khẩu file nguồn → Giải mã → xác nhận số mục để thêm vào kho đang mở. Chuẩn hóa `Name`, `Login`, `Password`, `PIN`, `URL`, `Note`, `Label`; trường khác được gom vào `Note`; bỏ qua `Lịch sử/History`. Login dạng email tự thêm nhãn Email. Nhãn Bank tạo loại Bank và trường Account. Bỏ qua mẫu và mục đã xóa. Mục trùng vẫn được nhập. Không thay kho cũ và không lưu mật khẩu nguồn. Giải mã, kiểm tra zlib/XML trên thiết bị rồi mã hóa lại bằng khóa kho hiện tại.
 

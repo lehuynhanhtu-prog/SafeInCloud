@@ -1,4 +1,4 @@
-# SafeInCloud cá nhân · 0.5.4
+# SafeInCloud cá nhân · 0.5.5
 Ứng dụng độc lập, không liên kết với nhà phát hành SafeInCloud thương mại.
 
 Repository: https://github.com/lehuynhanhtu-prog/SafeInCloud
@@ -6,7 +6,7 @@ Repository: https://github.com/lehuynhanhtu-prog/SafeInCloud
 ## Chức năng
 Kho mật khẩu APP, WEB, Email, Bank, thẻ tín dụng và khóa cửa; thêm/sửa/xóa, tìm kiếm, trường tùy chỉnh dạng văn bản hoặc mật khẩu, tạo mật khẩu, nhập CSV SafeInCloud với các cột chính xác `Title,Login,Password,URL,Notes,OTP`, sao lưu/khôi phục mã hóa, Google Drive.
 
-Web/PWA là ứng dụng chính. Android Native 1.3.1 dùng Android Views, Android Keystore và BiometricPrompt, không dùng WebView/Custom Tabs. Windows Portable mở đúng bản Web qua Edge app mode. Cả ba bản dùng cùng một kho mã hóa trên một tài khoản Google. Hướng dẫn Android: [android/README-native.md](android/README-native.md). Web: https://lehuynhanhtu-prog.github.io/SafeInCloud/
+Web/PWA là ứng dụng chính. Android Native 1.3.2 dùng Android Views, Android Keystore và BiometricPrompt, không dùng WebView/Custom Tabs. Windows Portable mở đúng bản Web qua Edge app mode. Cả ba bản dùng cùng một kho mã hóa trên một tài khoản Google. Hướng dẫn Android: [android/README-native.md](android/README-native.md). Web: https://lehuynhanhtu-prog.github.io/SafeInCloud/
 
 File mẫu đính kèm có sáu cột và 115 dòng trống, không chứa tài khoản/mật khẩu. Bộ nhập bỏ qua các dòng trống.
 
@@ -14,7 +14,9 @@ File mẫu đính kèm có sáu cột và 115 dòng trống, không chứa tài 
 Authorized JavaScript origin: `https://lehuynhanhtu-prog.github.io` (không gồm đường dẫn `/SafeInCloud/`).
 Project number: 862228353042. Web Client ID đã điền từ cấu hình Sổ Xe cá nhân; cần xác nhận trong Console nếu ID đã đổi. Bật Drive API, thêm origin chính xác của web SafeInCloud vào Authorized JavaScript origins và email vào Test users. Web xin `openid email` để hiển thị/khóa đúng tài khoản cùng scope `drive.appdata`; Android lấy email từ AccountPicker. Không dùng Client Secret hay Picker API key. Kho nằm trong vùng dữ liệu ứng dụng riêng trên Drive.
 
-Nguyên tắc dữ liệu: **một tài khoản Google = một file kho hiện hành `AT_SafeInCloud.vault`**. Đồng bộ lần đầu nhận diện snapshot mới nhất và đánh dấu nó là file hiện hành; các lần sau cập nhật đúng file đó thay vì tạo snapshot mới. Web, Android và Windows Portable chọn cùng email sẽ đọc/ghi cùng kho. Ứng dụng lưu hash lần đồng bộ gần nhất để xác định bên nào thay đổi; nếu cả thiết bị và Google cùng thay đổi, Google được coi là nguồn chung nhưng người dùng phải xác nhận trước khi thay dữ liệu cục bộ. Không tự hợp nhất hai bản mã khác nhau.
+Nguyên tắc dữ liệu: **một tài khoản Google = một file kho hiện hành `AT_SafeInCloud.vault`**. Web và Android luôn mã hóa/lưu trên thiết bị trước nên vẫn thêm, sửa và xóa được khi ngoại tuyến. Khi tài khoản đã kết nối và có Internet, ứng dụng tự kiểm tra lúc mở khóa, khi mạng trở lại, sau mỗi thay đổi và định kỳ trong phiên mở. Các thay đổi được hợp nhất theo `id` và `updatedAt`; dấu xóa (`deletedAt`) làm thao tác xóa lan sang thiết bị khác thay vì để bản cũ xuất hiện lại. Sau hợp nhất, ứng dụng cập nhật đúng file Drive hiện hành thay vì tạo snapshot mới.
+
+Web không lưu access token dài hạn: khi token hết hạn, Google Identity được gọi lại bằng email đã gắn; nếu trình duyệt yêu cầu tương tác thì trạng thái cục bộ vẫn được giữ và người dùng chọn **Đồng bộ tài khoản Google** để cấp lại quyền. Android thử cấp quyền lại im lặng cho email đã lưu; nếu Google yêu cầu màn hình đồng ý thì cũng tiếp tục hoạt động cục bộ đến lần kết nối thủ công. Hai kho được tạo độc lập với salt/mật khẩu khác nhau không bị ghi đè tự động; hãy sao lưu bản cục bộ rồi lấy kho Google làm kho ban đầu trên thiết bị đó.
 
 Mật khẩu chính mới tối thiểu 6 ký tự; chấp nhận chữ, số và ký tự đặc biệt. Các kho cũ vẫn mở bằng mật khẩu gốc. Client ID được ẩn khỏi giao diện; đây là định danh OAuth công khai, không phải khóa mã hóa. Import file CSV nằm trong Cài đặt và thanh công cụ sau mở khóa.
 
@@ -48,7 +50,7 @@ Tạo database mới yêu cầu chọn đúng tài khoản Google đang gắn v�
 Tham chiếu PRF: https://www.w3.org/TR/webauthn-3/#prf-extension
 
 
-## Nhập trực tiếp SafeInCloud .db (Web 0.5.4 / Android 1.3.1)
+## Nhập trực tiếp SafeInCloud .db (Web 0.5.5 / Android 1.3.2)
 
 Mở hoặc tạo kho đích trước. Chọn **Cài đặt → Nhập dữ liệu → Nhập SafeInCloud .db** → chọn file `.db` → nhập **mật khẩu của file nguồn** → Giải mã → kiểm tra số mục → xác nhận nhập. Mật khẩu nguồn có thể khác mật khẩu chính của kho đích. Sai mật khẩu, hủy hoặc khóa kho trước khi xác nhận không làm thay đổi kho hiện tại. Không ghi nhớ mật khẩu nguồn và không gửi file/dữ liệu giải mã lên mạng.
 
