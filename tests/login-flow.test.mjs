@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {derive,seal,open} from '../dist/crypto.js';
 
-test('six failures prompt reset; cancel and Drive errors preserve vault; successful reset archives old ciphertext',async()=>{
+test('six failures prompt reset; Drive errors preserve vault; successful reset binds one Google account',async()=>{
  class Element{
   constructor(){this.value='';this.hidden=false;this.required=false;this.disabled=false;this.children=[];this.open=false;this.dataset={};this.type='password'}
   replaceChildren(...items){this.children=items} append(...items){this.children.push(...items)}
@@ -20,7 +20,12 @@ test('six failures prompt reset; cancel and Drive errors preserve vault; success
  Object.defineProperty(globalThis,'navigator',{configurable:true,value:{locks:{request:async(_name,fn)=>fn()}}});
  const nativeInterval=globalThis.setInterval,nativeTimeout=globalThis.setTimeout;
  globalThis.setInterval=()=>0;globalThis.setTimeout=()=>0;
- globalThis.fetch=async(url,options)=>{assert(url.includes('upload/drive/v3/files'));assert.equal(options.headers.Authorization,'Bearer synthetic-access-token');assert(!options.body.includes('new-synthetic-password'));uploads++;return {ok:uploadOK}};
+ globalThis.fetch=async(url,options={})=>{
+  assert.equal(options.headers.Authorization,'Bearer synthetic-access-token');
+  if(url.includes('/oauth2/v3/userinfo'))return {ok:true,json:async()=>({email:'vault@example.invalid'})};
+  if(url.includes('/drive/v3/files?spaces='))return {ok:true,json:async()=>({files:[]})};
+  assert(url.includes('upload/drive/v3/files'));assert(!options.body.includes('new-synthetic-password'));uploads++;return {ok:uploadOK,status:uploadOK?200:503,json:async()=>({id:'shared-file'})};
+ };
  const store='safeincloud.vault.v1',salt=crypto.getRandomValues(new Uint8Array(16));
  const original=JSON.stringify(await seal([{id:'one',title:'old',fields:{Password:'synthetic'}}],await derive('old-synthetic-password',salt),salt));
  storage.set(store,original);
@@ -44,8 +49,8 @@ test('six failures prompt reset; cancel and Drive errors preserve vault; success
   elements['new-vault-form'].onsubmit({preventDefault(){}});await wait(()=>uploads===1&&!elements['new-vault-create'].disabled);
   assert.equal(storage.get(store),original);assert.equal(elements.workspace.hidden,true);
   uploadOK=true;elements['new-vault-form'].onsubmit({preventDefault(){}});
-  await wait(()=>storage.get(store)!==original);
-  assert.equal(uploads,2);assert([...storage.keys()].some(k=>k.startsWith(store+'.previous.')&&storage.get(k)===original));
+  await wait(()=>storage.get(store)!==original&&storage.has('safeincloud.drive.v1'));
+  assert.equal(uploads,2);assert(![...storage.keys()].some(k=>k.startsWith(store+'.previous.')));assert.equal(JSON.parse(storage.get('safeincloud.drive.v1')).email,'vault@example.invalid');
   assert.deepEqual((await open(JSON.parse(storage.get(store)),'new-synthetic-password')).items,[]);
   assert.equal(storage.has('safeincloud.failures.v1'),false);assert.equal(elements['new-password'].value,'');
   elements['workspace-settings'].onclick();assert.equal(elements.settings.open,true);

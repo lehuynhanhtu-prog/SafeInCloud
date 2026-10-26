@@ -9,6 +9,8 @@ test('desktop and mobile keep import, downloads, backup and restore inside setti
  const toolbar=workspace.slice(workspace.indexOf('<div class="toolbar">'),workspace.indexOf('<div class="summary">'));
  assert(!/id="(?:import-db|import|backup|restore|sync)"/.test(toolbar));
  for(const id of ['import-db','import','backup','restore','sync','clear-all'])assert(settings.includes(`id="${id}"`),id);
+ assert(settings.includes('id="drive-account"'));assert(settings.includes('Đồng bộ tài khoản Google'));
+ assert(!settings.includes('id="gate-drive"'));assert(!settings.includes('id="previous-backup"'));
  assert(settings.includes('chuẩn hóa Name, Login, Password, PIN, URL, Note, Label'));
  assert(settings.includes('href="downloads.html"'));
  assert(html.includes('<option>Bank</option>'));assert(html.includes('Thêm trường text hoặc mật khẩu'));
@@ -16,4 +18,7 @@ test('desktop and mobile keep import, downloads, backup and restore inside setti
  assert(mobile.includes("['Cài đặt','settings','⚙']"));assert(!mobile.includes('mobile-data'));
  const css=await readFile(new URL('../dist/style.css',import.meta.url),'utf8');
  assert(css.includes('.settings-grid'));assert(css.includes('@media(max-width:650px)'));
+ const app=await readFile(new URL('../dist/app.js',import.meta.url),'utf8');
+ assert(app.includes("role:'current'"));assert(app.includes("method:current?'PATCH':'POST'"));
+ assert(app.includes("scope:'openid email https://www.googleapis.com/auth/drive.appdata'"));
 });
