@@ -48,7 +48,28 @@ export async function decryptDatabase(value,password){
 }
 const truth=s=>/^(true|1)$/i.test(s||'');
 const direct=(node,name)=>Array.from(node.childNodes||[]).filter(n=>n.nodeType===1&&n.nodeName===name);
-const isHistory=s=>{const value=String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();return value.includes('lich su')||value.includes('history');};
+const normalize=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+const isHistory=s=>{const value=normalize(s);return value.includes('lich su')||value.includes('history');};
+const isEmail=s=>/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(String(s||'').trim());
+const isBank=tags=>tags.some(tag=>/\b(bank|banking|ngan hang)\b/.test(normalize(tag)));
+function standardField(type,name,bank){
+ const t=normalize(type),n=normalize(name);
+ if(bank&&/^(account|account number|bank account|so tai khoan|tai khoan|tai khoan ngan hang)$/.test(n))return 'Account';
+ if(t==='login')return 'Login';
+ if(t==='password')return 'Password';
+ if(t==='website'||t==='url')return 'URL';
+ if(t==='pin')return 'PIN';
+ if(t==='notes'||t==='note')return 'Note';
+ if(/^(name|title|ten|ten muc)$/.test(n))return 'Name';
+ if(/^(login|username|user name|ten dang nhap|email|e-mail)$/.test(n))return 'Login';
+ if(/^(password|pass|mat khau)$/.test(n))return 'Password';
+ if(/^pin(?: code| number)?$/.test(n))return 'PIN';
+ if(/^(url|website|web site|trang web|dia chi web)$/.test(n))return 'URL';
+ if(/^(note|notes|ghi chu)$/.test(n))return 'Note';
+ if(/^(label|labels|nhan)$/.test(n))return 'Label';
+ return null;
+}
+function uniqueLabels(values){const seen=new Set();return values.flatMap(value=>String(value||'').split(/[,;]+/)).map(x=>x.trim()).filter(x=>{const key=normalize(x);if(!key||seen.has(key))return false;seen.add(key);return true;});}
 function put(fields,name,value){let n=name||'Trường',i=2;while(Object.hasOwn(fields,n))n=`${name} (${i++})`;Object.defineProperty(fields,n,{value,enumerable:true});}
 const MIME={txt:'text/plain',csv:'text/csv',pdf:'application/pdf',png:'image/png',jpg:'image/jpeg',jpeg:'image/jpeg',gif:'image/gif',webp:'image/webp',svg:'image/svg+xml',doc:'application/msword',docx:'application/vnd.openxmlformats-officedocument.wordprocessingml.document',xls:'application/vnd.ms-excel',xlsx:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',zip:'application/zip'};
 function attachment(node,remaining){
@@ -74,22 +95,33 @@ export function parseDatabase(xml,Parser=globalThis.DOMParser){
   if(truth(card.getAttribute('template'))){templates++;continue;}
   if(truth(card.getAttribute('deleted'))){deleted++;continue;}
   if(items.length>=20000)throw Error('Kho vượt quá 20.000 mục.');
-  const fields={},originalFields=[];
-  for(const f of direct(card,'field')){
-   const type=f.getAttribute('type')||'',original=f.getAttribute('name')||'Trường';
+  const fieldNodes=direct(card,'field');
+  let tags=direct(card,'label_id').map(n=>labels.get(n.textContent.trim())||n.textContent.trim());
+  tags.push(...fieldNodes.filter(f=>standardField(f.getAttribute('type')||'',f.getAttribute('name')||'',false)==='Label').map(f=>f.textContent||''));
+  const bank=isBank(tags),fields={},originalFields=[],noteParts=[];
+  let title=(card.getAttribute('title')||'').trim();
+  for(const f of fieldNodes){
+   const type=f.getAttribute('type')||'',original=f.getAttribute('name')||'Trường',value=f.textContent||'';
    if(isHistory(original)){skippedHistory++;continue;}
-   const names={login:'Login',password:'Password',website:'URL',otp:'OTP',totp:'OTP',notes:'Notes'};const canonical=Object.hasOwn(names,type)?names[type]:null;
-   put(fields,canonical&&!Object.hasOwn(fields,canonical)?canonical:original,f.textContent||'');
+   const canonical=standardField(type,original,bank);
+   if(canonical==='Name'){if(!title)title=value.trim();else if(value.trim()&&value.trim()!==title)noteParts.push(`${original}: ${value}`);}
+   else if(canonical==='Note')noteParts.push(value);
+   else if(canonical==='Label')tags.push(value);
+   else if(canonical&&!Object.hasOwn(fields,canonical))put(fields,canonical,value);
+   else if(value)noteParts.push(`${original}: ${value}`);
    const attrs=Object.fromEntries(Array.from(f.attributes).map(a=>[a.name,a.value]));
    if(Object.hasOwn(attrs,'history')){if(attrs.history)skippedHistory++;delete attrs.history;}
    originalFields.push(attrs);
   }
-  const notes=direct(card,'notes').map(n=>n.textContent||'').join('\n');if(notes)put(fields,'Notes',notes);
-  const tags=direct(card,'label_id').map(n=>labels.get(n.textContent.trim())||n.textContent.trim());if(tags.length)put(fields,'Nhãn',tags.join(', '));
+  const notes=direct(card,'notes').map(n=>n.textContent||'').filter(Boolean);noteParts.push(...notes);
+  tags=uniqueLabels(tags);if(isEmail(fields.Login)&&!tags.some(tag=>normalize(tag)==='email'))tags.push('Email');
+  if(tags.length)put(fields,'Label',tags.join(', '));
+  if(bank&&!Object.hasOwn(fields,'Account'))put(fields,'Account','');
+  const note=noteParts.filter(Boolean).join('\n');if(note)put(fields,'Note',note);
   const files=[];
   for(const f of direct(card,'file'))try{const parsed=attachment(f,MAX_ATTACHMENTS-attachmentBytes);files.push(parsed);attachmentBytes+=parsed.size;attachments++;}catch{skippedAttachments++;}
   const category=classifyImportedItem({tags,url:fields.URL,login:fields.Login});
-  const item={id:crypto.randomUUID(),title:card.getAttribute('title')||'Chưa đặt tên',category,fields,updatedAt:new Date().toISOString(),source:{format:'SafeInCloud-db-v1',attributes:Object.fromEntries(Array.from(card.attributes).map(a=>[a.name,a.value])),fields:originalFields}};
+  const item={id:crypto.randomUUID(),title:title||'Chưa đặt tên',category,fields,fieldTypes:Object.fromEntries(Object.keys(fields).map(name=>[name,/^(Password|PIN)$/i.test(name)?'password':'text'])),updatedAt:new Date().toISOString(),source:{format:'SafeInCloud-db-v1',attributes:Object.fromEntries(Array.from(card.attributes).map(a=>[a.name,a.value])),fields:originalFields}};
   if(files.length)item.attachments=files;
   items.push(item);
  }
