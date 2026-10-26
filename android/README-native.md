@@ -1,6 +1,6 @@
-# SafeInCloud Android Native 1.2.0
+# SafeInCloud Android Native 1.3.0
 
-Android 8.0+ (minSdk 26), package `vn.safeincloud.personal`, versionCode 6.
+Android 8.0+ (minSdk 26), package `vn.safeincloud.personal`, versionCode 7.
 Giao diện Material 3 và xử lý kho viết bằng Java/Android Views; không có WebView, Custom Tabs hay JavaScript bridge. Form dùng nhãn nổi, nút ẩn/hiện tích hợp, thẻ thông tin và điều hướng dưới native. Cài đặt chỉ xuất hiện khi kho đã mở.
 
 ## Dữ liệu và bảo mật
@@ -35,10 +35,12 @@ GitHub Actions giải mã keystore từ Secrets vào RUNNER_TEMP, chạy `testDe
 
 Kiểm thử: mở fixture do Web tạo bằng mật khẩu Unicode, round trip AES-GCM, chống sửa bản mã/sai mật khẩu, IV ngẫu nhiên, xóa byte khóa session, CSV dấu ngoặc kép/newline/OTP. Build thành công không thay cho kiểm thử thiết bị: chưa xác nhận biometric, SAF hoặc Google OAuth trên điện thoại thật. Chưa kiểm toán bảo mật độc lập.
 
-## Nhập .db phiên bản 1.2.0
+## Nhập .db phiên bản 1.3.0
 
-Cài đặt → Nhập SafeInCloud .db → chọn file → nhập mật khẩu file nguồn → Giải mã → xác nhận số mục để thêm vào kho đang mở. Giữ trường tùy chỉnh/ghi chú/nhãn; bỏ qua mẫu và mục đã xóa. Mục trùng vẫn được nhập. Không thay kho cũ và không lưu mật khẩu nguồn. Giải mã, kiểm tra zlib/XML trên thiết bị rồi mã hóa lại bằng khóa kho hiện tại.
+Cài đặt → Nhập SafeInCloud .db → chọn file → nhập mật khẩu file nguồn → Giải mã → xác nhận số mục để thêm vào kho đang mở. Chuẩn hóa `Name`, `Login`, `Password`, `PIN`, `URL`, `Note`, `Label`; trường khác được gom vào `Note`; bỏ qua `Lịch sử/History`. Login dạng email tự thêm nhãn Email. Nhãn Bank tạo loại Bank và trường Account. Bỏ qua mẫu và mục đã xóa. Mục trùng vẫn được nhập. Không thay kho cũ và không lưu mật khẩu nguồn. Giải mã, kiểm tra zlib/XML trên thiết bị rồi mã hóa lại bằng khóa kho hiện tại.
 
-Chỉ hỗ trợ legacy v1 (magic 0x0505/version 1), file tối đa 10 MB, XML tối đa 20 MB, tổng tối đa 20.000 mục. Kho có tệp đính kèm hoặc phiên bản chưa hỗ trợ bị từ chối. File xuất và tên snapshot Drive: `AT_SafeInCloud.vault`; format `.vault` không đổi và vẫn mở được bằng Web. Snapshot mới không ghi đè snapshot Drive trước đó.
+Chỉ hỗ trợ legacy v1 (magic 0x0505/version 1), file tối đa 10 MB, XML tối đa 20 MB, tổng tối đa 20.000 mục. Tệp đính kèm được phục hồi mặc định, mã hóa trong kho và có thể lưu ra thiết bị; tệp hỏng, trên 4 MB hoặc làm tổng tệp nhập vượt 6 MB được bỏ qua. File xuất và tên snapshot Drive: `AT_SafeInCloud.vault`; format `.vault` không đổi và vẫn mở được bằng Web. Snapshot mới không ghi đè snapshot Drive trước đó.
+
+Màn hình thêm/sửa cho phép chọn từng trường là Văn bản hoặc Mật khẩu. Loại Bank tự tạo trường Account. Cài đặt có nút Xóa toàn bộ dữ liệu với bước xác nhận; thao tác làm rỗng mục và tệp đính kèm nhưng giữ mật khẩu kho cùng bản sao cũ.
 
 Có fixture dữ liệu giả dùng chung Web/Android để kiểm tra mật khẩu Unicode, giải mã và chuyển trường. Không dùng file thật hoặc mật khẩu người dùng trong mã nguồn, fixture hoặc log.
