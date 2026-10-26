@@ -1,4 +1,4 @@
-# SafeInCloud cá nhân · 0.5.5
+# SafeInCloud cá nhân · 0.5.6
 Ứng dụng độc lập, không liên kết với nhà phát hành SafeInCloud thương mại.
 
 Repository: https://github.com/lehuynhanhtu-prog/SafeInCloud
@@ -6,7 +6,7 @@ Repository: https://github.com/lehuynhanhtu-prog/SafeInCloud
 ## Chức năng
 Kho mật khẩu APP, WEB, Email, Bank, thẻ tín dụng và khóa cửa; thêm/sửa/xóa, tìm kiếm, trường tùy chỉnh dạng văn bản hoặc mật khẩu, tạo mật khẩu, nhập CSV SafeInCloud với các cột chính xác `Title,Login,Password,URL,Notes,OTP`, sao lưu/khôi phục mã hóa, Google Drive.
 
-Web/PWA là ứng dụng chính. Android Native 1.3.2 dùng Android Views, Android Keystore và BiometricPrompt, không dùng WebView/Custom Tabs. Windows Portable mở đúng bản Web qua Edge app mode. Cả ba bản dùng cùng một kho mã hóa trên một tài khoản Google. Hướng dẫn Android: [android/README-native.md](android/README-native.md). Web: https://lehuynhanhtu-prog.github.io/SafeInCloud/
+Web/PWA là ứng dụng chính. Android Native 1.3.2 dùng Android Views, Android Keystore và BiometricPrompt, không dùng WebView/Custom Tabs. Windows Portable 0.5.6 là launcher .NET 8 tự chứa, mở đúng origin Web qua Edge app mode nên dùng cùng localStorage, service worker và kho Google; không cần cài .NET. Cả ba bản dùng cùng một kho mã hóa trên một tài khoản Google. Hướng dẫn Android: [android/README-native.md](android/README-native.md). Web: https://lehuynhanhtu-prog.github.io/SafeInCloud/ Trang tải: https://lehuynhanhtu-prog.github.io/SafeInCloud/downloads.html
 
 File mẫu đính kèm có sáu cột và 115 dòng trống, không chứa tài khoản/mật khẩu. Bộ nhập bỏ qua các dòng trống.
 
@@ -50,7 +50,7 @@ Tạo database mới yêu cầu chọn đúng tài khoản Google đang gắn v�
 Tham chiếu PRF: https://www.w3.org/TR/webauthn-3/#prf-extension
 
 
-## Nhập trực tiếp SafeInCloud .db (Web 0.5.5 / Android 1.3.2)
+## Nhập trực tiếp SafeInCloud .db (Web 0.5.6 / Android 1.3.2)
 
 Mở hoặc tạo kho đích trước. Chọn **Cài đặt → Nhập dữ liệu → Nhập SafeInCloud .db** → chọn file `.db` → nhập **mật khẩu của file nguồn** → Giải mã → kiểm tra số mục → xác nhận nhập. Mật khẩu nguồn có thể khác mật khẩu chính của kho đích. Sai mật khẩu, hủy hoặc khóa kho trước khi xác nhận không làm thay đổi kho hiện tại. Không ghi nhớ mật khẩu nguồn và không gửi file/dữ liệu giải mã lên mạng.
 

@@ -1,0 +1,15 @@
+SAFEINCLOUD PORTABLE 0.5.6 - WINDOWS 10/11 64-BIT
+
+1. Giải nén toàn bộ file SafeInCloud-Windows-x64.zip.
+2. Chạy SafeInCloud.exe. Ứng dụng sẽ mở SafeInCloud bằng Microsoft Edge ở chế độ cửa sổ ứng dụng.
+3. Nếu máy chưa có dữ liệu, chọn "Đồng bộ từ tài khoản Google" và dùng đúng email đang dùng trên Web/APK.
+4. Nhập mật khẩu chính của kho để mở dữ liệu.
+
+Dữ liệu luôn được mã hóa và lưu cục bộ trước. Khi có Internet và tài khoản Google đã kết nối, ứng dụng tự kiểm tra và đồng bộ dữ liệu mới.
+
+Không cần cài .NET. Máy cần Microsoft Edge hoặc một trình duyệt mặc định và cần kết nối Internet ở lần mở đầu tiên.
+
+Web: https://lehuynhanhtu-prog.github.io/SafeInCloud/
+Tải bản mới: https://lehuynhanhtu-prog.github.io/SafeInCloud/downloads.html
+
+Lưu ý: bản Windows chưa ký Authenticode nên Windows SmartScreen có thể hiển thị cảnh báo. Chỉ tải từ trang chính thức ở trên.
